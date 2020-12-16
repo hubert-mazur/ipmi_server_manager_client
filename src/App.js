@@ -1,24 +1,72 @@
-import logo from './logo.svg';
-import './App.css';
+import { Switch, BrowserRouter as Router, Route } from "react-router-dom";
+import Login from "./components/login/login";
+import Register from "./components/register/register";
+import Dashboard from "./components/dashboard/dashboard";
+import Nav from "./components/nav/nav";
+import UserManagement from "./components/usermanagement/userManagement";
+import Machines from "./components/machines/machines";
+import axios from "axios";
+import "./App.css";
 
-function App() {
+axios.defaults.headers = {
+  "Content-Type": "application/json",
+  "auth-token": localStorage.getItem("jwt"),
+};
+
+function App(props) {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <Switch>
+          <Route path="/" exact component={Login} />
+          <Route path="/login/" exact component={Login} />
+        </Switch>
+        <Switch>
+          <Route
+            path="/api/register/"
+            exact
+            render={(props) => (
+              <div>
+                <Nav />
+                <Register />
+              </div>
+            )}
+          />
+          <Route
+            path="/api/dashboard/"
+            exact
+            render={(props) => (
+              <div>
+                <Nav />
+                <Dashboard />
+              </div>
+            )}
+          />
+
+          <Route
+            path="/api/users/"
+            exact
+            render={(props) => (
+              <div>
+                <Nav />
+                <UserManagement />
+              </div>
+            )}
+          />
+
+          <Route
+            path="/api/machines/"
+            exact
+            render={(props) => (
+              <div>
+                <Nav />
+                <Machines />
+              </div>
+            )}
+          />
+        </Switch>
+      </div>
+    </Router>
   );
 }
 
