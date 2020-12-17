@@ -8,6 +8,9 @@ import {
   ListItem,
   Dialog,
   DialogTitle,
+  DialogContent,
+  TextField,
+  Button,
 } from "@material-ui/core";
 import {
   PlayCircleFilled,
@@ -31,6 +34,14 @@ function Explore(props) {
   const [success, setSuccess] = useState(false);
   const [dialog, setDialog] = useState(false);
   const [sensor, setSensor] = useState([]);
+  const [settingsDialog, setSettingsDialog] = useState(false);
+  const [modifiedCreds, setModifiedCreds] = useState([]);
+  const [chosenMachine, setChosenMachine] = useState("");
+
+  const [name, setNameField] = useState("");
+  const [IP, setIPField] = useState("");
+  const [user, setUserField] = useState("");
+  const [password, setPasswordField] = useState("");
 
   useEffect(() => {
     getData();
@@ -52,6 +63,81 @@ function Explore(props) {
     setDialog(false);
   };
 
+  const handleSettingsDialogOpen = (machine) => {
+    setChosenMachine(machine);
+    setSettingsDialog(true);
+  };
+
+  const handleSettingsDialogClose = (machine) => {
+    setSettingsDialog(false);
+    setModifiedCreds([]);
+  };
+
+  const setName = async () => {
+    try {
+      const res = await axios.patch(
+        `http://localhost:3000/api/machine/${chosenMachine._id}/name`,
+        { name: name },
+        {}
+      );
+      // console.error(res.data.body);
+      setMachines([]);
+      getData();
+    } catch (err) {
+      console.error(err.response);
+      setError(err.response.data.body);
+    }
+  };
+
+  const setIP = async () => {
+    try {
+      const res = await axios.patch(
+        `http://localhost:3000/api/machine/${chosenMachine._id}/IP`,
+        { IP: IP },
+        {}
+      );
+      // console.error(res.data.body);
+      setMachines([]);
+      getData();
+    } catch (err) {
+      console.error(err.response);
+      setError(err.response.data.body);
+    }
+  };
+
+  const setUser = async () => {
+    try {
+      const res = await axios.patch(
+        `http://localhost:3000/api/machine/${chosenMachine._id}/user`,
+        { user: user },
+        {}
+      );
+      // console.error(res.data.body);
+      setMachines([]);
+      getData();
+    } catch (err) {
+      console.error(err.response);
+      setError(err.response.data.body);
+    }
+  };
+
+  const setPassword = async () => {
+    try {
+      const res = await axios.patch(
+        `http://localhost:3000/api/machine/${chosenMachine._id}/password`,
+        { password: password },
+        {}
+      );
+
+      console.error(res.data.body);
+      setMachines([]);
+      getData();
+    } catch (err) {
+      console.error(err.response);
+      setError(err.response.data.body);
+    }
+  };
+
   const getData = async () => {
     try {
       const res = await axios.get(`http://localhost:3000/api/machine/`, {});
@@ -60,7 +146,7 @@ function Explore(props) {
 
       for (let i = 0; i < machines.length; i++) {
         const status = await getMachineStatus(machines[i]._id);
-        machines[i]["status"] = status.data.body["Chassis power status"];
+        machines[i]["status"] = status;
       }
 
       // console.error(machines);
@@ -68,7 +154,7 @@ function Explore(props) {
       setMachines(machines);
     } catch (err) {
       console.error(err.response);
-      setError(err.response.data.message);
+      setError(err.response.data.body);
       if (err.response.status == 401) {
         props.history.push("/login");
       }
@@ -81,7 +167,14 @@ function Explore(props) {
         `http://localhost:3000/api/machine/owned`,
         {}
       );
-      setMachines(res.data.body);
+
+      const machines = res.data.body;
+
+      for (let i = 0; i < machines.length; i++) {
+        const status = await getMachineStatus(machines[i]._id);
+        machines[i]["status"] = status;
+      }
+      setMachines(machines);
     } catch (err) {
       console.error(err.response);
       setError(err.response);
@@ -116,11 +209,12 @@ function Explore(props) {
         {}
       );
       // console.error(res);
-      return res;
+      return res.data.body["Chassis power status"];
       // setMachineStatus(res.da)
     } catch (err) {
       console.error(err.response);
       setError(err.response.data.body.stderr);
+      return "err";
     } finally {
       setInProgress(false);
     }
@@ -248,7 +342,7 @@ function Explore(props) {
       )}
 
       <Select
-        defaultValue="other"
+        defaultValue="all"
         onChange={(event) => {
           setMachines([]);
           handleSearch(event.target.value);
@@ -329,7 +423,13 @@ function Explore(props) {
                 ></Tune>
               </td>
               <td>
-                <Settings style={{ fill: "brown" }} className="icon"></Settings>
+                <Settings
+                  style={{ fill: "brown" }}
+                  onClick={(event) => {
+                    handleSettingsDialogOpen(machines);
+                  }}
+                  className="icon"
+                ></Settings>
               </td>
               <td>
                 <DeleteForever
@@ -413,6 +513,73 @@ function Explore(props) {
             ))}
           </table>
         </List>
+      </Dialog>
+
+      <Dialog
+        open={settingsDialog}
+        onClose={(event) => {
+          handleSettingsDialogClose(machines);
+        }}
+      >
+        <DialogTitle>Machine credentials modifier</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="name"
+            margin="dense"
+            onChange={(event) => {
+              setNameField(event.target.value);
+            }}
+          ></TextField>
+          <Button
+            onClick={(event) => {
+              setName();
+            }}
+          >
+            Update
+          </Button>
+          <TextField
+            label="IP"
+            margin="dense"
+            onChange={(event) => {
+              setIPField(event.target.value);
+            }}
+          ></TextField>
+          <Button
+            onClick={(event) => {
+              setIP();
+            }}
+          >
+            Update
+          </Button>
+          <TextField
+            label="user"
+            margin="dense"
+            onChange={(event) => {
+              setUserField(event.target.value);
+            }}
+          ></TextField>
+          <Button
+            onClick={(event) => {
+              setUser();
+            }}
+          >
+            Update
+          </Button>
+          <TextField
+            label="password"
+            margin="dense"
+            onChange={(event) => {
+              setPasswordField(event.target.value);
+            }}
+          ></TextField>
+          <Button
+            onClick={(event) => {
+              setPassword();
+            }}
+          >
+            Update
+          </Button>
+        </DialogContent>
       </Dialog>
     </div>
   );
