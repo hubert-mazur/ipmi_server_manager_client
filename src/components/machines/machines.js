@@ -1,5 +1,14 @@
 import { React, useState, useEffect } from "react";
-import { MenuItem, Select, CircularProgress } from "@material-ui/core";
+import { withRouter } from "react-router-dom";
+import {
+  MenuItem,
+  Select,
+  CircularProgress,
+  List,
+  ListItem,
+  Dialog,
+  DialogTitle,
+} from "@material-ui/core";
 import {
   PlayCircleFilled,
   Settings,
@@ -7,6 +16,8 @@ import {
   FlashOff,
   Tune,
   DeleteForever,
+  Check,
+  Refresh,
 } from "@material-ui/icons";
 import { Alert } from "@material-ui/lab";
 import axios from "axios";
@@ -16,18 +27,51 @@ function Explore(props) {
   const [machines, setMachines] = useState([]);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("all");
+  const [inProgress, setInProgress] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [dialog, setDialog] = useState(false);
+  const [sensor, setSensor] = useState([]);
 
   useEffect(() => {
     getData();
   }, []);
 
+  const setSuccessTimeout = () => {
+    setSuccess(true);
+    setTimeout(() => {
+      setSuccess(false);
+    }, 5000);
+  };
+
+  const handleOpenDialog = async (machine) => {
+    await sensors(machine);
+    setDialog(true);
+  };
+
+  const handleClose = () => {
+    setDialog(false);
+  };
+
   const getData = async () => {
     try {
       const res = await axios.get(`http://localhost:3000/api/machine/`, {});
-      setMachines(res.data.body);
+
+      const machines = res.data.body;
+
+      for (let i = 0; i < machines.length; i++) {
+        const status = await getMachineStatus(machines[i]._id);
+        machines[i]["status"] = status.data.body["Chassis power status"];
+      }
+
+      // console.error(machines);
+
+      setMachines(machines);
     } catch (err) {
       console.error(err.response);
-      setError(err.response);
+      setError(err.response.data.message);
+      if (err.response.status == 401) {
+        props.history.push("/login");
+      }
     }
   };
 
@@ -60,55 +104,132 @@ function Explore(props) {
       else if (search == "assigned") getAssignedMachines();
     } catch (err) {
       console.error(err.response);
-      setError(err.response);
+      setError(err.response.data.body.stderr);
     }
   };
 
-  const bootMachine = async (machine_id) => {
+  const getMachineStatus = async (machine_id) => {
+    setInProgress(true);
     try {
       const res = await axios.get(
-        `http://localhost:3000/api/machine/${machine_id}/chassis/power/on`,
+        `http://localhost:3000/api/machine/${machine_id}/chassis/power/status`,
         {}
       );
+      // console.error(res);
+      return res;
+      // setMachineStatus(res.da)
     } catch (err) {
       console.error(err.response);
-      setError(err.response);
+      setError(err.response.data.body.stderr);
+    } finally {
+      setInProgress(false);
     }
   };
 
-  const shutDown = async (machine_id) => {
+  const bootMachine = async (machine) => {
+    setInProgress(true);
     try {
       const res = await axios.get(
-        `http://localhost:3000/api/machine/${machine_id}/chassis/power/soft`,
+        `http://localhost:3000/api/machine/${machine._id}/chassis/power/on`,
         {}
       );
+      machine.status = "on";
+      setMachines(...[machines]);
+      setSuccessTimeout();
     } catch (err) {
       console.error(err.response);
-      setError(err.response);
+      setError(err.response.data.body.stderr);
+    } finally {
+      setInProgress(false);
     }
   };
 
-  const powerOff = async (machine_id) => {
+  const shutDown = async (machine) => {
+    setInProgress(true);
     try {
       const res = await axios.get(
-        `http://localhost:3000/api/machine/${machine_id}/chassis/power/off`,
+        `http://localhost:3000/api/machine/${machine._id}/chassis/power/soft`,
         {}
       );
+      setSuccessTimeout();
+      machine.status = "off";
+      setMachines(...[machines]);
     } catch (err) {
-      console.error(err.response);
-      setError(err.response);
+      console.error(err.response.data.body.stderr);
+      setError(err.response.data.body.stderr);
+    } finally {
+      setInProgress(false);
+    }
+  };
+
+  const restartMachine = async (machine) => {
+    setInProgress(true);
+    try {
+      const res = await axios.get(
+        `http://localhost:3000/api/machine/${machine._id}/chassis/power/reset`,
+        {}
+      );
+      setSuccessTimeout();
+      machine.status = "on";
+      setMachines(...[machines]);
+    } catch (err) {
+      console.error(err.response.data.body.stderr);
+      setError(err.response.data.body.stderr);
+    } finally {
+      setInProgress(false);
+    }
+  };
+
+  const powerOff = async (machine) => {
+    setInProgress(true);
+    try {
+      const res = await axios.get(
+        `http://localhost:3000/api/machine/${machine._id}/chassis/power/off`,
+        {}
+      );
+      setSuccessTimeout();
+      machine.status = "off";
+      setMachines(...[machines]);
+    } catch (err) {
+      console.error(err.response.data.body.stderr);
+      setError(err.response.data.body.stderr);
+    } finally {
+      setInProgress(false);
+    }
+  };
+
+  const sensors = async (machine) => {
+    setInProgress(true);
+    try {
+      const res = await axios.get(
+        `http://localhost:3000/api/machine/${machine._id}/sensor`,
+        {}
+      );
+      setSuccessTimeout();
+      setSensor(res.data.body);
+      // console.error(res.data.body);
+    } catch (err) {
+      console.error(err.response.data.body.stderr);
+      setError(err.response.data.body.stderr);
+    } finally {
+      setInProgress(false);
     }
   };
 
   const bootParamSet = async (machine_id, param) => {
+    setInProgress(true);
+    console.error(param);
     try {
       const res = await axios.get(
         `http://localhost:3000/api/machine/${machine_id}/chassis/bootdev/${param}`,
         {}
       );
+      setSuccessTimeout();
     } catch (err) {
-      console.error(err.response);
-      setError(err.response);
+      console.error(err.response.data.body.stderr);
+      setError(err.response.data.body.stderr);
+    } finally {
+      setInProgress(false);
     }
   };
 
@@ -122,7 +243,7 @@ function Explore(props) {
             setError(null);
           }}
         >
-          {error.data.body}
+          {error}
         </Alert>
       )}
 
@@ -140,12 +261,13 @@ function Explore(props) {
 
       <div className="">
         <table>
-          <tr>
+          <tr style={{ backgroundColor: "cornflowerblue" }}>
             <td>Name</td>
             <td>IP</td>
             <td>Port</td>
             <td>User</td>
             <td>Password</td>
+            <td>Status</td>
           </tr>
           {machines.map((machines) => (
             <tr>
@@ -154,11 +276,15 @@ function Explore(props) {
               <td>{machines.port}</td>
               <td>{machines.user}</td>
               <td>{machines.password}</td>
-
+              <td style={{ color: machines.status == "on" ? "green" : "red" }}>
+                {machines.status}
+              </td>
               <td>
                 <PlayCircleFilled
                   onClick={(event) => {
-                    bootMachine(machines._id);
+                    bootMachine(machines);
+                    // machines.status = 'on'
+                    // setMachines([machines]);
                   }}
                   style={{ fill: "brown" }}
                   className="icon"
@@ -167,26 +293,43 @@ function Explore(props) {
               <td>
                 <PowerOff
                   onClick={(event) => {
-                    powerOff(machines._id);
+                    powerOff(machines);
                   }}
                   style={{ fill: "brown" }}
                   className="icon"
                 ></PowerOff>
               </td>
-              <td>
-                <Settings style={{ fill: "brown" }} className="icon"></Settings>
-              </td>
+
               <td>
                 <FlashOff
                   onClick={(event) => {
-                    shutDown(machines._id);
+                    shutDown(machines);
                   }}
                   style={{ fill: "brown" }}
                   className="icon"
                 ></FlashOff>
               </td>
+
               <td>
-                <Tune style={{ fill: "brown" }} className="icon"></Tune>
+                <Refresh
+                  onClick={(event) => {
+                    restartMachine(machines);
+                  }}
+                  style={{ fill: "brown" }}
+                  className="icon"
+                ></Refresh>
+              </td>
+              <td>
+                <Tune
+                  style={{ fill: "brown" }}
+                  className="icon"
+                  onClick={(event) => {
+                    handleOpenDialog(machines);
+                  }}
+                ></Tune>
+              </td>
+              <td>
+                <Settings style={{ fill: "brown" }} className="icon"></Settings>
               </td>
               <td>
                 <DeleteForever
@@ -204,7 +347,9 @@ function Explore(props) {
                     bootParamSet(machines._id, event.target.value);
                   }}
                 >
-                  <MenuItem value="none">none</MenuItem>
+                  <MenuItem selected={true} value="none">
+                    none
+                  </MenuItem>
                   <MenuItem value="pxe">pxe</MenuItem>
                   <MenuItem value="disk">disk</MenuItem>
                   <MenuItem value="safe">safe</MenuItem>
@@ -214,12 +359,63 @@ function Explore(props) {
                   <MenuItem value="floppy">floppy</MenuItem>
                 </Select>
               </td>
+              <td>
+                {inProgress && <CircularProgress></CircularProgress>}{" "}
+                {success && <Check style={{ fill: "green" }}></Check>}
+              </td>
             </tr>
           ))}
         </table>
       </div>
+      <Dialog
+        onClose={(event) => {
+          handleClose();
+        }}
+        open={dialog}
+      >
+        <DialogTitle>Sensors reading</DialogTitle>
+
+        <List>
+          <table>
+            <tr style={{ backgroundColor: "cornflowerblue" }}>
+              <td>Name</td>
+              <td>Value</td>
+              <td>Unit</td>
+              <td>State</td>
+              <td>High</td>
+              <td>Critical</td>
+            </tr>
+            {sensor.map((sensor) => (
+              <tr
+                style={{
+                  height: 50,
+                  backgroundColor:
+                    parseFloat(sensor[0][2]) > parseFloat(sensor[0][8])
+                      ? "orange"
+                      : "lightgreen",
+                }}
+              >
+                <td style={{ columnWidth: 200, textAlign: "center" }}>
+                  {sensor[0][0]}
+                </td>
+                <td style={{ fontWeight: "bold", textAlign: "center" }}>
+                  {sensor[0][1]}
+                </td>
+                <td style={{ textAlign: "center" }}>{sensor[0][2]}</td>
+                <td style={{ textAlign: "center" }}>{sensor[0][3]}</td>
+                <td style={{ textAlign: "center" }}>
+                  {sensor[0][8].trim() != "na" && sensor[0][8]}
+                </td>
+                <td style={{ textAlign: "center" }}>
+                  {sensor[0][9].trim() != "na" && sensor[0][9]}
+                </td>
+              </tr>
+            ))}
+          </table>
+        </List>
+      </Dialog>
     </div>
   );
 }
 
-export default Explore;
+export default withRouter(Explore);

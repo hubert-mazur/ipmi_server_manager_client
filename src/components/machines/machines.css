@@ -10,3 +10,8 @@
     margin: 50px, 50px, 50px, 50px;
   }
   
+
+  table, tr, td {
+    column-width: 120px;
+    margin-top: 20px;
+  }

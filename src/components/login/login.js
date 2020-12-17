@@ -25,8 +25,9 @@ export default function (props) {
       localStorage.setItem("jwt", res.data);
       props.history.push("/api/dashboard");
     } catch (err) {
-      console.log(err.response.statusText);
-      setError(err.response);
+      
+      console.log(err.response.data.body);
+      setError(err.response.data.body);
     }
   }
 
@@ -39,7 +40,7 @@ export default function (props) {
             setError(null);
           }}
         >
-          {error.data.meta}
+          {error}
         </Alert>
       )}
       <form

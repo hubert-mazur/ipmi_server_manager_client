@@ -38,14 +38,8 @@ export default function (props) {
       props.history.push("/login");
     } catch (err) {
       if (err) {
-        if (err.response.data.meta == "validationError") {
-          // console.error(err.response.data.body.error.details[0].message);
-          // setError(err.response.data.body.error.details[0].message);
-          console.error(err.response)
-        } else {
-          console.error(err.response.body);
-          setError(err.response.body);
-        }
+        console.error(err.response.body);
+        setError(err.response.body);
       }
     }
   }
