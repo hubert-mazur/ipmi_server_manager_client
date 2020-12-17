@@ -118,6 +118,16 @@ function Nav(props) {
             ></Storage>{" "}
             <span>Machines</span>
           </div>
+          <div>
+          <Storage
+              className="svg_icons"
+              style={{ fill: "green" }}
+              onClick={(event) => {
+                props.history.push("/api/machines/register");
+              }}
+            ></Storage>{" "}
+            <span>Register machine</span>
+          </div>
         </div>
       </div>
     </div>

@@ -1,11 +1,4 @@
-.main {
-    margin-left: 10%;
-    margin-right: 10%;
-}
 
-.user {
-    background-color: antiquewhite;
-}
 
 .icon {
     transform: scale(1.5);
@@ -13,3 +6,8 @@
     display: inline-flex;
     vertical-align: middle;
 }
+
+table, tr, td {
+    table-layout: fixed;
+    margin-top: 20px;
+  }

@@ -2,7 +2,9 @@
     max-width: 100vh;
     float: left;
     position: relative;
+    justify-content: left;
     margin-left: 10px;
+    display: block;
   }
   
   /* .svg_icons {

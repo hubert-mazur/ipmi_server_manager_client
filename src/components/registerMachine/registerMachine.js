@@ -1,24 +1,25 @@
 import React, { useState } from "react";
 import { withRouter } from "react-router-dom";
-import { TextField, Button, Checkbox } from "@material-ui/core";
+import { TextField, Button } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 import axios from "axios";
 import "./register.css";
 
-function Nav(props) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+function RegisterMachine(props) {
   const [name, setName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [admin, setAdmin] = useState(false);
+  const [IP, setIP] = useState("");
+  const [port, setPort] = useState("");
+  const [user, setUser] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
 
   function validateForm() {
     return (
-      email.length > 0 &&
-      password.length > 0 &&
       name.length > 0 &&
-      lastName.length > 0
+      IP.length > 0 &&
+      port.length > 0 &&
+      user.length > 0 &&
+      password.length > 0
     );
   }
 
@@ -26,16 +27,16 @@ function Nav(props) {
     event.preventDefault();
     try {
       await axios.post(
-        "http://localhost:3000/api/register",
+        "http://localhost:3000/api/machine",
         JSON.stringify({
-          email: email,
-          password: password,
           name: name,
-          lastName: lastName,
-          admin: admin,
+          IP: IP,
+          port: port,
+          user: user,
+          password: password,
         })
       );
-      props.history.push("/api/users");
+      props.history.push("/api/machines");
     } catch (err) {
       console.error(err.response.body);
       setError(err.response.body);
@@ -62,53 +63,42 @@ function Nav(props) {
         className="form"
       >
         <TextField
-          id="name"
           label="name"
-          type="name"
           onChange={(event) => {
             setName(event.target.value);
           }}
         />
         <TextField
-          id="lastName"
-          label="lastName"
-          type="lastName"
+          label="IP"
           onChange={(event) => {
-            setLastName(event.target.value);
+            setIP(event.target.value);
           }}
         />
         <TextField
-          id="email"
-          label="email"
-          type="email"
+          label="port"
           onChange={(event) => {
-            setEmail(event.target.value);
+            setPort(event.target.value);
           }}
         />
         <TextField
-          id="password"
+          label="user"
+          onChange={(event) => {
+            setUser(event.target.value);
+          }}
+        />
+        <TextField
           label="password"
-          type="password"
           onChange={(event) => {
             setPassword(event.target.value);
           }}
         />
-        <span>
-          {" "}
-          Administrative privileges{" "}
-          <Checkbox
-            onChange={(event) => {
-              setAdmin(event.target.checked);
-            }}
-          ></Checkbox>
-        </span>
 
         <Button type="submit" disabled={!validateForm()}>
-          Register
+          Register machine
         </Button>
       </form>
     </div>
   );
 }
 
-export default withRouter(Nav);
+export default withRouter(RegisterMachine);

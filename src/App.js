@@ -5,6 +5,7 @@ import Dashboard from "./components/dashboard/dashboard";
 import Nav from "./components/nav/nav";
 import UserManagement from "./components/usermanagement/userManagement";
 import Machines from "./components/machines/machines";
+import RegisterMachine from "./components/registerMachine/registerMachine";
 import axios from "axios";
 import "./App.css";
 
@@ -61,6 +62,17 @@ function App(props) {
               <div>
                 <Nav />
                 <Machines />
+              </div>
+            )}
+          />
+
+          <Route
+            path="/api/machines/register"
+            exact
+            render={(props) => (
+              <div>
+                <Nav />
+                <RegisterMachine />
               </div>
             )}
           />
