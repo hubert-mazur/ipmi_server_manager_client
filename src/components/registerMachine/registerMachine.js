@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { withRouter } from "react-router-dom";
-import { TextField, Button } from "@material-ui/core";
+import { TextField, Button, Checkbox } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 import axios from "axios";
 import "./register.css";
@@ -12,6 +12,8 @@ function RegisterMachine(props) {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const [scriptUsage, setScriptUsage] = useState(false);
+  const [scriptCommand, setScriptCommand] = useState("");
 
   function validateForm() {
     return (
@@ -34,6 +36,8 @@ function RegisterMachine(props) {
           port: port,
           user: user,
           password: password,
+          scriptUsage: scriptUsage,
+          script: scriptCommand
         })
       );
       props.history.push("/api/machines");
@@ -92,6 +96,22 @@ function RegisterMachine(props) {
             setPassword(event.target.value);
           }}
         />
+        <span>
+          Run via script?{" "}
+          <Checkbox
+            onChange={(event) => {
+              setScriptUsage(event.target.checked);
+            }}
+          ></Checkbox>
+        </span>
+
+        <TextField
+          disabled={!scriptUsage}
+          label="script"
+          onChange={(event) => {
+            setScriptCommand(event.target.value);
+          }}
+        ></TextField>
 
         <Button type="submit" disabled={!validateForm()}>
           Register machine
