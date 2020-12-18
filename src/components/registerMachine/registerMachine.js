@@ -48,7 +48,7 @@ function RegisterMachine(props) {
   }
 
   return (
-    <div className="Login">
+    <div className="main">
       {error && (
         <Alert
           severity="error"

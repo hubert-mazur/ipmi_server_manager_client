@@ -247,7 +247,7 @@ function UserManagement(props) {
             setError(null);
           }}
         >
-          {error.data.body}
+          {error}
         </Alert>
       )}
       <table>
@@ -268,7 +268,7 @@ function UserManagement(props) {
 
             <td>
               <Storage
-                style={{ fill: "blue" }}
+                style={{ fill: "green" }}
                 className="icon"
                 onClick={(event) => {
                   handleOpenDialog(users);
@@ -358,6 +358,7 @@ function UserManagement(props) {
       >
         <DialogTitle>User credentials modifer </DialogTitle>
         <DialogContent>
+          <span style={{display: "block"}}>
           <TextField
             label="name"
             margin="dense"
@@ -372,6 +373,8 @@ function UserManagement(props) {
           >
             Update
           </Button>
+          </span>
+          <span style={{display: "block"}}>
           <TextField
             label="lastName"
             margin="dense"
@@ -386,6 +389,8 @@ function UserManagement(props) {
           >
             Update
           </Button>
+          </span>
+          <span style={{display: "block"}}>
           <TextField
             label="email"
             margin="dense"
@@ -400,6 +405,8 @@ function UserManagement(props) {
           >
             Update
           </Button>
+          </span>
+          <span style={{display: "block"}}>
           <TextField
             label="oldPassword"
             margin="dense"
@@ -422,6 +429,7 @@ function UserManagement(props) {
           >
             Update
           </Button>
+          </span>
         </DialogContent>
       </Dialog>
     </div>

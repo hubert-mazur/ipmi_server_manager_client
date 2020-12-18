@@ -23,9 +23,8 @@ export default function (props) {
         JSON.stringify({ email: email, password: password })
       );
       localStorage.setItem("jwt", res.data);
-      props.history.push("/api/dashboard");
+      props.history.push("/api/users");
     } catch (err) {
-      
       console.log(err.response.data.body);
       setError(err.response.data.body);
     }

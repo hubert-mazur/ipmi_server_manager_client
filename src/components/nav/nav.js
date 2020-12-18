@@ -2,16 +2,14 @@ import { React, useState, useEffect } from "react";
 import { withRouter } from "react-router-dom";
 import {
   AccountCircle,
-  AddCircle,
   Dashboard,
-  Fireplace,
   ExitToApp,
   PersonAdd,
   Contacts,
   Storage,
 } from "@material-ui/icons";
 import { Alert } from "@material-ui/lab";
-import "./nav.css";
+import "./navigationPanel.css";
 import axios from "axios";
 
 function Nav(props) {
@@ -51,7 +49,7 @@ function Nav(props) {
   };
 
   return (
-    <div>
+    <div className="sidebar">
       {error && (
         <Alert
           severity="error"
@@ -64,31 +62,39 @@ function Nav(props) {
         </Alert>
       )}
 
-      <div className="nav">
-        <div style={{ marginBottom: 10 }}>
-          <AccountCircle></AccountCircle> {name} {lastName}
-        </div>
-        <div style={{ marginBottom: 50 }}>
-          <ExitToApp
-            style={{ fill: "red" }}
-            className="svg_icons"
-            onClick={(event) => {
-              logout();
-            }}
-          ></ExitToApp>
-          <span>Logout</span>
-        </div>
-        <div style={{ lineHeight: 3 }}>
-          <div>
+      <table style={{ borderSpacing: 20 }}>
+        <tr>
+          <td>
+            <AccountCircle></AccountCircle> {name} {lastName}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <ExitToApp
+              style={{ fill: "red" }}
+              className="svg_icons"
+              onClick={(event) => {
+                logout();
+              }}
+            ></ExitToApp>{" "}
+            Logout
+          </td>
+        </tr>
+
+        <tr>
+          <td>
             <Dashboard
               className="svg_icons"
+              style={{ fill: "blue" }}
               onClick={(event) => {
                 dashboard();
               }}
             ></Dashboard>
-            <span>Dashboard</span>
-          </div>
-          <div>
+            Dashboard
+          </td>
+        </tr>
+        <tr>
+          <td>
             <PersonAdd
               style={{ fill: "green" }}
               className="svg_icons"
@@ -96,40 +102,49 @@ function Nav(props) {
                 props.history.push("/api/register");
               }}
             ></PersonAdd>
-            <span>Register user</span>
-          </div>
-          <div>
+            Register user
+          </td>
+        </tr>
+
+        <tr>
+          <td>
             <Contacts
-              style={{ fill: "green" }}
+              style={{ fill: "blue" }}
               className="svg_icons"
               onClick={(event) => {
                 props.history.push("/api/users");
               }}
             ></Contacts>
-            <span>Manage users</span>
-          </div>
-          <div>
+            Manage users
+          </td>
+        </tr>
+
+        <tr>
+          <td>
             <Storage
               className="svg_icons"
-              style={{ fill: "green" }}
+              style={{ fill: "blue" }}
               onClick={(event) => {
                 props.history.push("/api/machines");
               }}
             ></Storage>{" "}
-            <span>Machines</span>
-          </div>
-          <div>
-          <Storage
+            Machines
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <Storage
               className="svg_icons"
               style={{ fill: "green" }}
               onClick={(event) => {
                 props.history.push("/api/machines/register");
               }}
             ></Storage>{" "}
-            <span>Register machine</span>
-          </div>
-        </div>
-      </div>
+            Register machine
+          </td>
+        </tr>
+      </table>
     </div>
   );
 }

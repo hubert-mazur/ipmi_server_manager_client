@@ -1,17 +1,21 @@
+.main {
+  margin-left: 260px;
+}
 .machine {
-        background-color:rgb(69, 107, 165);
-        display: block;
-        flex-direction: column;
-        padding-bottom: 15px;
+  background-color: rgb(69, 107, 165);
+  display: block;
+  flex-direction: column;
+  padding-bottom: 15px;
 }
 
-  .icon {
-    transform: scale(1.3);
-    margin: 50px, 50px, 50px, 50px;
-  }
-  
+.icon {
+  transform: scale(1.3);
+  margin: 50px, 50px, 50px, 50px;
+}
 
-  table, tr, td {
-    column-width: 120px;
-    margin-top: 20px;
-  }
+table,
+tr,
+td {
+  column-width: 120px;
+  margin-top: 20px;
+}

@@ -5,7 +5,6 @@ import {
   Select,
   CircularProgress,
   List,
-  ListItem,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -42,6 +41,7 @@ function Explore(props) {
   const [IP, setIPField] = useState("");
   const [user, setUserField] = useState("");
   const [password, setPasswordField] = useState("");
+  const [scriptField, setScriptField] = useState("");
 
   useEffect(() => {
     getData();
@@ -56,7 +56,6 @@ function Explore(props) {
 
   const handleOpenDialog = async (machine) => {
     await sensors(machine);
-    setDialog(true);
   };
 
   const handleClose = () => {
@@ -126,6 +125,23 @@ function Explore(props) {
       const res = await axios.patch(
         `http://localhost:3000/api/machine/${chosenMachine._id}/password`,
         { password: password },
+        {}
+      );
+
+      console.error(res.data.body);
+      setMachines([]);
+      getData();
+    } catch (err) {
+      console.error(err.response);
+      setError(err.response.data.body);
+    }
+  };
+
+  const setScript = async () => {
+    try {
+      const res = await axios.patch(
+        `http://localhost:3000/api/machine/${chosenMachine._id}/script`,
+        { script: scriptField },
         {}
       );
 
@@ -301,6 +317,7 @@ function Explore(props) {
       );
       setSuccessTimeout();
       setSensor(res.data.body);
+      setDialog(true);
       // console.error(res.data.body);
     } catch (err) {
       console.error(err.response.data.body.stderr);
@@ -361,6 +378,7 @@ function Explore(props) {
             <td>Port</td>
             <td>User</td>
             <td>Password</td>
+            <td>Script</td>
             <td>Status</td>
           </tr>
           {machines.map((machines) => (
@@ -370,6 +388,7 @@ function Explore(props) {
               <td>{machines.port}</td>
               <td>{machines.user}</td>
               <td>{machines.password}</td>
+              <td>{machines.scriptUsage ? "true" : "false"}</td>
               <td style={{ color: machines.status == "on" ? "green" : "red" }}>
                 {machines.status}
               </td>
@@ -504,10 +523,10 @@ function Explore(props) {
                 <td style={{ textAlign: "center" }}>{sensor[0][2]}</td>
                 <td style={{ textAlign: "center" }}>{sensor[0][3]}</td>
                 <td style={{ textAlign: "center" }}>
-                  {sensor[0][8].trim() != "na" && sensor[0][8]}
+                  {(sensor[0][8] + "").trim() != "na" && sensor[0][8]}
                 </td>
                 <td style={{ textAlign: "center" }}>
-                  {sensor[0][9].trim() != "na" && sensor[0][9]}
+                  {(sensor[0][9] + "").trim() != "na" && sensor[0][9]}
                 </td>
               </tr>
             ))}
@@ -523,62 +542,86 @@ function Explore(props) {
       >
         <DialogTitle>Machine credentials modifier</DialogTitle>
         <DialogContent>
-          <TextField
-            label="name"
-            margin="dense"
-            onChange={(event) => {
-              setNameField(event.target.value);
-            }}
-          ></TextField>
-          <Button
-            onClick={(event) => {
-              setName();
-            }}
-          >
-            Update
-          </Button>
-          <TextField
-            label="IP"
-            margin="dense"
-            onChange={(event) => {
-              setIPField(event.target.value);
-            }}
-          ></TextField>
-          <Button
-            onClick={(event) => {
-              setIP();
-            }}
-          >
-            Update
-          </Button>
-          <TextField
-            label="user"
-            margin="dense"
-            onChange={(event) => {
-              setUserField(event.target.value);
-            }}
-          ></TextField>
-          <Button
-            onClick={(event) => {
-              setUser();
-            }}
-          >
-            Update
-          </Button>
-          <TextField
-            label="password"
-            margin="dense"
-            onChange={(event) => {
-              setPasswordField(event.target.value);
-            }}
-          ></TextField>
-          <Button
-            onClick={(event) => {
-              setPassword();
-            }}
-          >
-            Update
-          </Button>
+          <span style={{ display: "block" }}>
+            <TextField
+              label="name"
+              margin="dense"
+              onChange={(event) => {
+                setNameField(event.target.value);
+              }}
+            ></TextField>
+            <Button
+              onClick={(event) => {
+                setName();
+              }}
+            >
+              Update
+            </Button>
+          </span>
+          <span style={{ display: "block" }}>
+            <TextField
+              label="IP"
+              margin="dense"
+              onChange={(event) => {
+                setIPField(event.target.value);
+              }}
+            ></TextField>
+            <Button
+              onClick={(event) => {
+                setIP();
+              }}
+            >
+              Update
+            </Button>
+          </span>
+          <span style={{ display: "block" }}>
+            <TextField
+              label="user"
+              margin="dense"
+              onChange={(event) => {
+                setUserField(event.target.value);
+              }}
+            ></TextField>
+            <Button
+              onClick={(event) => {
+                setUser();
+              }}
+            >
+              Update
+            </Button>
+          </span>
+          <span style={{ display: "block" }}>
+            <TextField
+              label="password"
+              margin="dense"
+              onChange={(event) => {
+                setPasswordField(event.target.value);
+              }}
+            ></TextField>
+            <Button
+              onClick={(event) => {
+                setPassword();
+              }}
+            >
+              Update
+            </Button>
+          </span>
+          <span style={{ display: "block" }}>
+            <TextField
+              label="script"
+              margin="dense"
+              onChange={(event) => {
+                setScriptField(event.target.value);
+              }}
+            ></TextField>
+            <Button
+              onClick={(event) => {
+                setScript();
+              }}
+            >
+              Update
+            </Button>
+          </span>
         </DialogContent>
       </Dialog>
     </div>
