@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { withRouter } from "react-router-dom";
 import { TextField, Button, Checkbox } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
-import axios from "axios";
+import axios from "../../instance";
 import "./register.css";
 
-function Nav(props) {
+function Register(props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -37,8 +37,8 @@ function Nav(props) {
       );
       props.history.push("/api/users");
     } catch (err) {
-      console.error(err.response.body);
-      setError(err.response.body);
+      console.error(err.response.data.body);
+      setError(err.response.data.body);
     }
   }
 
@@ -111,4 +111,4 @@ function Nav(props) {
   );
 }
 
-export default withRouter(Nav);
+export default withRouter(Register);

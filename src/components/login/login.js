@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { Route } from "react-router-dom";
 import { TextField, Button } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 import "./login.css";
-import axios from "axios";
+import axios from "../../instance";
 
 export default function (props) {
   const [email, setEmail] = useState("");
@@ -23,6 +22,9 @@ export default function (props) {
         JSON.stringify({ email: email, password: password })
       );
       localStorage.setItem("jwt", res.data);
+
+      axios.defaults.headers["auth-token"] = localStorage.getItem("jwt");
+
       props.history.push("/api/users");
     } catch (err) {
       console.log(err.response.data.body);

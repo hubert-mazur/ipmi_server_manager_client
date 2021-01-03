@@ -10,7 +10,7 @@ import {
 } from "@material-ui/icons";
 import { Alert } from "@material-ui/lab";
 import "./navigationPanel.css";
-import axios from "axios";
+import axios from "../../instance";
 
 function Nav(props) {
   const [name, setName] = useState("");

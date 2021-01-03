@@ -18,7 +18,7 @@ import {
   Settings,
 } from "@material-ui/icons";
 import { Alert } from "@material-ui/lab";
-import axios from "axios";
+import axios from "../../instance";
 import "./userManagement.css";
 
 function UserManagement(props) {

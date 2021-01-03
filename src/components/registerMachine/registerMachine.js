@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { withRouter } from "react-router-dom";
 import { TextField, Button, Checkbox } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
-import axios from "axios";
+import axios from "../../instance";
 import "./register.css";
 
 function RegisterMachine(props) {
@@ -42,8 +42,8 @@ function RegisterMachine(props) {
       );
       props.history.push("/api/machines");
     } catch (err) {
-      console.error(err.response.body);
-      setError(err.response.body);
+      console.error(err.response.data.body);
+      setError(err.response.data.body);
     }
   }
 

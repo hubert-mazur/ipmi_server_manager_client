@@ -22,7 +22,7 @@ import {
   Refresh,
 } from "@material-ui/icons";
 import { Alert } from "@material-ui/lab";
-import axios from "axios";
+import axios from "../../instance";
 import "./machines.css";
 
 function Explore(props) {
@@ -30,11 +30,9 @@ function Explore(props) {
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("all");
   const [inProgress, setInProgress] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [dialog, setDialog] = useState(false);
   const [sensor, setSensor] = useState([]);
   const [settingsDialog, setSettingsDialog] = useState(false);
-  const [modifiedCreds, setModifiedCreds] = useState([]);
   const [chosenMachine, setChosenMachine] = useState("");
 
   const [name, setNameField] = useState("");
@@ -47,10 +45,10 @@ function Explore(props) {
     getData();
   }, []);
 
-  const setSuccessTimeout = () => {
-    setSuccess(true);
+  const setSuccessTimeout = (machine) => {
+    machine["operationSuccess"] = true;
     setTimeout(() => {
-      setSuccess(false);
+      machine["operationSuccess"] = false;
     }, 5000);
   };
 
@@ -69,7 +67,6 @@ function Explore(props) {
 
   const handleSettingsDialogClose = (machine) => {
     setSettingsDialog(false);
-    setModifiedCreds([]);
   };
 
   const setName = async () => {
@@ -161,11 +158,9 @@ function Explore(props) {
       const machines = res.data.body;
 
       for (let i = 0; i < machines.length; i++) {
-        const status = await getMachineStatus(machines[i]._id);
+        const status = await getMachineStatus(machines[i]);
         machines[i]["status"] = status;
       }
-
-      // console.error(machines);
 
       setMachines(machines);
     } catch (err) {
@@ -187,9 +182,10 @@ function Explore(props) {
       const machines = res.data.body;
 
       for (let i = 0; i < machines.length; i++) {
-        const status = await getMachineStatus(machines[i]._id);
+        const status = await getMachineStatus(machines[i]);
         machines[i]["status"] = status;
       }
+      console.error(machines);
       setMachines(machines);
     } catch (err) {
       console.error(err.response);
@@ -217,14 +213,16 @@ function Explore(props) {
     }
   };
 
-  const getMachineStatus = async (machine_id) => {
+  const getMachineStatus = async (machine) => {
     setInProgress(true);
+    machine["operationInProgress"] = true;
     try {
       const res = await axios.get(
-        `http://localhost:3000/api/machine/${machine_id}/chassis/power/status`,
+        `http://localhost:3000/api/machine/${machine._id}/chassis/power/status`,
         {}
       );
       // console.error(res);
+      machine["operationInProgress"] = false;
       return res.data.body["Chassis power status"];
       // setMachineStatus(res.da)
     } catch (err) {
@@ -232,90 +230,105 @@ function Explore(props) {
       setError(err.response.data.body.stderr);
       return "err";
     } finally {
+      machine["operationInProgress"] = false;
       setInProgress(false);
     }
   };
 
   const bootMachine = async (machine) => {
     setInProgress(true);
+    machine["operationInProgress"] = true;
     try {
       const res = await axios.get(
         `http://localhost:3000/api/machine/${machine._id}/chassis/power/on`,
         {}
       );
       machine.status = "on";
+      machine["operationInProgress"] = false;
       setMachines(...[machines]);
-      setSuccessTimeout();
+      setSuccessTimeout(machine);
     } catch (err) {
       console.error(err.response);
       setError(err.response.data.body.stderr);
     } finally {
+      machine["operationInProgress"] = false;
       setInProgress(false);
     }
   };
 
   const shutDown = async (machine) => {
     setInProgress(true);
+    machine["operationInProgress"] = true;
     try {
       const res = await axios.get(
         `http://localhost:3000/api/machine/${machine._id}/chassis/power/soft`,
         {}
       );
-      setSuccessTimeout();
+      setSuccessTimeout(machine);
       machine.status = "off";
+      machine["operationInProgress"] = false;
       setMachines(...[machines]);
     } catch (err) {
       console.error(err.response.data.body.stderr);
       setError(err.response.data.body.stderr);
     } finally {
+      machine["operationInProgress"] = false;
       setInProgress(false);
     }
   };
 
   const restartMachine = async (machine) => {
     setInProgress(true);
+    machine["operationInProgress"] = true;
     try {
       const res = await axios.get(
         `http://localhost:3000/api/machine/${machine._id}/chassis/power/reset`,
         {}
       );
-      setSuccessTimeout();
+      setSuccessTimeout(machine);
       machine.status = "on";
+      machine["operationInProgress"] = false;
       setMachines(...[machines]);
     } catch (err) {
       console.error(err.response.data.body.stderr);
       setError(err.response.data.body.stderr);
     } finally {
+      machine["operationInProgress"] = false;
       setInProgress(false);
     }
   };
 
   const powerOff = async (machine) => {
     setInProgress(true);
+    machine["operationInProgress"] = true;
     try {
       const res = await axios.get(
         `http://localhost:3000/api/machine/${machine._id}/chassis/power/off`,
         {}
       );
-      setSuccessTimeout();
+      setSuccessTimeout(machine);
       machine.status = "off";
+      machine["operationInProgress"] = false;
       setMachines(...[machines]);
     } catch (err) {
       console.error(err.response.data.body.stderr);
       setError(err.response.data.body.stderr);
     } finally {
+      machine["operationInProgress"] = false;
       setInProgress(false);
     }
   };
 
   const sensors = async (machine) => {
     setInProgress(true);
+    machine["operationInProgress"] = true;
     try {
       const res = await axios.get(
         `http://localhost:3000/api/machine/${machine._id}/sensor`,
         {}
       );
-      setSuccessTimeout();
+      machine["operationInProgress"] = false;
+      setSuccessTimeout(machine);
       setSensor(res.data.body);
       setDialog(true);
       // console.error(res.data.body);
@@ -323,23 +336,26 @@ function Explore(props) {
       console.error(err.response.data.body.stderr);
       setError(err.response.data.body.stderr);
     } finally {
+      machine["operationInProgress"] = false;
       setInProgress(false);
     }
   };
 
-  const bootParamSet = async (machine_id, param) => {
+  const bootParamSet = async (machine, param) => {
     setInProgress(true);
-    console.error(param);
+    machine["operationInProgress"] = true;
     try {
       const res = await axios.get(
-        `http://localhost:3000/api/machine/${machine_id}/chassis/bootdev/${param}`,
+        `http://localhost:3000/api/machine/${machine._id}/chassis/bootdev/${param}`,
         {}
       );
-      setSuccessTimeout();
+      setSuccessTimeout(machine);
+      machine["operationInProgress"] = false;
     } catch (err) {
       console.error(err.response.data.body.stderr);
       setError(err.response.data.body.stderr);
     } finally {
+      machine["operationInProgress"] = false;
       setInProgress(false);
     }
   };
@@ -389,7 +405,16 @@ function Explore(props) {
               <td>{machines.user}</td>
               <td>{machines.password}</td>
               <td>{machines.scriptUsage ? "true" : "false"}</td>
-              <td style={{ color: machines.status == "on" ? "green" : "red" }}>
+              <td
+                style={{
+                  color:
+                    machines.status == "on"
+                      ? "green"
+                      : machines.status == "off"
+                      ? "orange"
+                      : "red",
+                }}
+              >
                 {machines.status}
               </td>
               <td>
@@ -399,7 +424,6 @@ function Explore(props) {
                     // machines.status = 'on'
                     // setMachines([machines]);
                   }}
-                  style={{ fill: "brown" }}
                   className="icon"
                 ></PlayCircleFilled>
               </td>
@@ -408,7 +432,6 @@ function Explore(props) {
                   onClick={(event) => {
                     powerOff(machines);
                   }}
-                  style={{ fill: "brown" }}
                   className="icon"
                 ></PowerOff>
               </td>
@@ -418,7 +441,6 @@ function Explore(props) {
                   onClick={(event) => {
                     shutDown(machines);
                   }}
-                  style={{ fill: "brown" }}
                   className="icon"
                 ></FlashOff>
               </td>
@@ -428,13 +450,11 @@ function Explore(props) {
                   onClick={(event) => {
                     restartMachine(machines);
                   }}
-                  style={{ fill: "brown" }}
                   className="icon"
                 ></Refresh>
               </td>
               <td>
                 <Tune
-                  style={{ fill: "brown" }}
                   className="icon"
                   onClick={(event) => {
                     handleOpenDialog(machines);
@@ -443,7 +463,6 @@ function Explore(props) {
               </td>
               <td>
                 <Settings
-                  style={{ fill: "brown" }}
                   onClick={(event) => {
                     handleSettingsDialogOpen(machines);
                   }}
@@ -452,7 +471,6 @@ function Explore(props) {
               </td>
               <td>
                 <DeleteForever
-                  style={{ fill: "brown" }}
                   className="icon"
                   onClick={(event) => {
                     deleteMachine(machines._id);
@@ -463,7 +481,7 @@ function Explore(props) {
                 <Select
                   placeholder="boot dev"
                   onChange={(event) => {
-                    bootParamSet(machines._id, event.target.value);
+                    bootParamSet(machines, event.target.value);
                   }}
                 >
                   <MenuItem selected={true} value="none">
@@ -479,8 +497,12 @@ function Explore(props) {
                 </Select>
               </td>
               <td>
-                {inProgress && <CircularProgress></CircularProgress>}{" "}
-                {success && <Check style={{ fill: "green" }}></Check>}
+                {machines["operationInProgress"] && (
+                  <CircularProgress></CircularProgress>
+                )}{" "}
+                {machines["operationSuccess"] && (
+                  <Check style={{ fill: "green" }}></Check>
+                )}
               </td>
             </tr>
           ))}
